@@ -2,13 +2,15 @@ import genToken from "../config/token.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
+// ✅ COOKIE CONFIG (DEPLOY SAFE)
 const cookieOptions = {
   httpOnly: true,
   maxAge: 7 * 24 * 60 * 60 * 1000,
-  sameSite: "none",   // ✅ REQUIRED for cross-domain
-  secure: true        // ✅ REQUIRED for HTTPS
+  sameSite: "none",   // REQUIRED for frontend-backend different domains
+  secure: true        // REQUIRED because Render/Vercel use HTTPS
 };
 
+// ================= SIGN UP =================
 export const signUp = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -23,7 +25,9 @@ export const signUp = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "password must be at least 6 characters !" });
+      return res
+        .status(400)
+        .json({ message: "password must be at least 6 characters !" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,15 +40,19 @@ export const signUp = async (req, res) => {
 
     const token = await genToken(user._id);
 
+    // ✅ SET COOKIE
     res.cookie("token", token, cookieOptions);
 
-    return res.status(201).json(user);
+    // ✅ NEVER SEND PASSWORD TO FRONTEND
+    user.password = undefined;
 
+    return res.status(201).json(user);
   } catch (error) {
     return res.status(500).json({ message: `sign up error ${error}` });
   }
 };
 
+// ================= LOGIN =================
 export const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -65,18 +73,23 @@ export const Login = async (req, res) => {
 
     const token = await genToken(user._id);
 
+    // ✅ SET COOKIE
     res.cookie("token", token, cookieOptions);
 
-    return res.status(200).json(user);
+    // ✅ HIDE PASSWORD
+    user.password = undefined;
 
+    return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: `login error ${error}` });
   }
 };
 
+// ================= LOGOUT =================
 export const logOut = async (req, res) => {
   try {
     res.clearCookie("token", {
+      httpOnly: true,
       sameSite: "none",
       secure: true
     });
