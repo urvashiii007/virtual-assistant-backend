@@ -46,21 +46,10 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://virtual-assistant-frontend-beta.vercel.app"
-];
-
+// ✅ SIMPLE + CORRECT CORS (VERY IMPORTANT)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: "https://virtual-assistant-frontend-beta.vercel.app",
     credentials: true,
   })
 );
@@ -81,6 +70,4 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => {
   connectDb();
   console.log("server started");
-  //console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
 });
-
