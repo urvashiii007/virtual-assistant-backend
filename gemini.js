@@ -168,7 +168,7 @@ export default geminiResponse;
 import axios from "axios";
 
 // 🔍 Debug check (abhi ke liye theek hai)
-console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
+//console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
 
 const geminiResponse = async (command, assistantName, userName) => {
   try {

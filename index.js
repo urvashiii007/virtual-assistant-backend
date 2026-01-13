@@ -28,42 +28,33 @@ app.listen(port,()=>{
 })
 */
 
-
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import connectDb from "./config/db.js";
 import authRouter from "./routes/auth.routes.js";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
-//import geminiResponse from "./gemini.js";
 
-// 🔥 REQUIRED FOR ES MODULES (.env FIX)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔥 THIS LINE FIXES YOUR ISSUE
 dotenv.config({ path: path.join(__dirname, ".env") });
-
-// 🔍 DEBUG (ab undefined nahi aana chahiye)
-//console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
 
 const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://virtual-assistant-frontend-beta.vercel.app/"
+  "https://virtual-assistant-frontend-beta.vercel.app"
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow server-to-server & postman
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -71,16 +62,8 @@ app.use(
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// 👇 THIS IS VERY IMPORTANT (preflight fix)
-app.options("*", cors());
-
-
-const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -88,8 +71,16 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 
+// health check
+app.get("/", (req, res) => {
+  res.send("API running");
+});
+
+const port = process.env.PORT || 5000;
+
 app.listen(port, () => {
   connectDb();
   console.log("server started");
-  console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
+  //console.log("GEMINI KEY:", process.env.GEMINI_API_KEY);
 });
+
