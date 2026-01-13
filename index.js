@@ -46,7 +46,10 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 
-// ✅ SIMPLE + CORRECT CORS (VERY IMPORTANT)
+/* 🔥🔥🔥 MOST IMPORTANT LINE (COOKIE FIX) */
+app.set("trust proxy", 1);
+
+/* ✅ SIMPLE CORS */
 app.use(
   cors({
     origin: "https://virtual-assistant-frontend-beta.vercel.app",
@@ -60,7 +63,6 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 
-// health check
 app.get("/", (req, res) => {
   res.send("API running");
 });
